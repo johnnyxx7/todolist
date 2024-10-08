@@ -65,4 +65,23 @@ public class TaskController {
         var taskUpdated = this.repository.save(task);
         return ResponseEntity.ok().body(taskUpdated);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable UUID id, HttpServletRequest request) {
+        var task = this.repository.findById(id).orElse(null);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Tarefa não encontrada.");
+        }
+
+        var idUser = request.getAttribute("idUser");
+
+        if (!task.getIdUser().equals(idUser)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Usúario não tem permissão para deletar essa tarefa.");
+        }
+
+        this.repository.delete(task);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
